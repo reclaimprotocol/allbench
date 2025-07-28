@@ -24,9 +24,15 @@ export async function GET(request: NextRequest) {
     
     const rubrics = await Rubric.find(searchQuery).sort({ createdAt: -1 });
     
+    // Ensure rubrics is an array
+    if (!Array.isArray(rubrics)) {
+      console.error('Rubrics query did not return an array:', typeof rubrics, rubrics);
+      return NextResponse.json([]);
+    }
+    
     // Transform the MongoDB documents to match frontend expectations
     const transformedRubrics = rubrics.map(rubric => ({
-      id: rubric._id.toString(),
+      id: rubric._id?.toString() || 'unknown',
       name: rubric.name,
       description: rubric.description,
       taskId: rubric.taskId

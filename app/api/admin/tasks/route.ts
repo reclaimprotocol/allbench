@@ -1,18 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '../../../../lib/mongoose';
 import Task from '../../../../models/Task';
+import { safeMap, safeToObject } from '../../../../lib/mongoUtils';
 
 export async function GET() {
   try {
     await connectDB();
     const tasks = await Task.find({}).sort({ createdAt: -1 });
     
-    // Transform _id to id for frontend compatibility
-    const transformedTasks = tasks.map(task => ({
-      ...task.toObject(),
-      id: task._id.toString(),
-      _id: undefined
-    }));
+    // Use safe mapping to handle potential serialization issues
+    const transformedTasks = await safeMap(tasks, (task: any) => {
+      const taskObj = safeToObject(task);
+      return {
+        ...taskObj,
+        id: task._id?.toString() || taskObj._id?.toString() || 'unknown',
+        _id: undefined
+      };
+    });
     
     return NextResponse.json(transformedTasks);
   } catch (error) {

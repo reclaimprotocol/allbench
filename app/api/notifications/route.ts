@@ -173,6 +173,16 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Error creating notification:', error);
+    
+    // Log specific details for map-related errors
+    if (error instanceof TypeError && error.message.includes('map')) {
+      console.error('Map error details:', {
+        message: error.message,
+        stack: error.stack,
+        type: typeof error
+      });
+    }
+    
     return NextResponse.json({ error: 'Failed to create notification' }, { status: 500 });
   }
 }

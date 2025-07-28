@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '../../../lib/mongoose';
 import User from '../../../models/User';
+import { safeMap } from '../../../lib/mongoUtils';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,8 +12,8 @@ export async function GET(request: NextRequest) {
       .sort({ points: -1, createdAt: 1 })
       .select('username points');
 
-    // Create leaderboard with ranks
-    const leaderboard = users.map((user, index) => ({
+    // Create leaderboard with ranks using safe mapping
+    const leaderboard = await safeMap(users, (user: any, index: number) => ({
       rank: index + 1,
       username: user.username,
       points: user.points

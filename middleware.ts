@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // Handle admin route protection
-  if (request.nextUrl.pathname.startsWith('/admin')) {
+  try {
+    // Handle admin route protection
+    if (request.nextUrl.pathname.startsWith('/admin')) {
     const authHeader = request.headers.get('authorization');
     
     if (!authHeader || !authHeader.startsWith('Basic ')) {
@@ -55,6 +56,21 @@ export function middleware(request: NextRequest) {
   }
   
   return NextResponse.next();
+  } catch (error) {
+    console.error('Middleware error:', error);
+    
+    // Log specific details for map-related errors
+    if (error instanceof TypeError && error.message.includes('map')) {
+      console.error('Map error in middleware:', {
+        message: error.message,
+        stack: error.stack,
+        url: request.url,
+        method: request.method
+      });
+    }
+    
+    return NextResponse.next();
+  }
 }
 
 export const config = {
