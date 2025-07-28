@@ -1,0 +1,32 @@
+{
+  "name": "allbench-backend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "seed": "ts-node --esm scripts/seed.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.57.0",
+    "@types/multer": "^2.0.0",
+    "firebase-admin": "^13.4.0",
+    "mongoose": "^8.16.5",
+    "multer": "^2.0.2",
+    "next": "15.4.4",
+    "openai": "^5.10.2",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "ts-node": "^10.9.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^18",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
