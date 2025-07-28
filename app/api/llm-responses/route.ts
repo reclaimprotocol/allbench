@@ -18,6 +18,12 @@ const anthropic = new Anthropic({
 function messagesToPrompt(messages: any[], task: any): string {
   let prompt = ``;
   
+  // Ensure messages is an array
+  if (!Array.isArray(messages)) {
+    console.error('messagesToPrompt: messages is not an array:', typeof messages, messages);
+    messages = [];
+  }
+  
   messages.forEach((message: any, index: number) => {
     if (message.contentType === 'text') {
       prompt += `${index + 1}. ${message.content}\n`;
@@ -166,7 +172,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate prompt from messages and task
-    const prompt = messagesToPrompt(messages || [], task);
+    const safeMessages = Array.isArray(messages) ? messages : [];
+    const prompt = messagesToPrompt(safeMessages, task);
     console.log('LLM API - Generated prompt:', prompt.substring(0, 200) + '...');
     console.log('LLM API - Using system prompt:', task.systemPrompt);
 

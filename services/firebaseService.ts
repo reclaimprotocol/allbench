@@ -112,17 +112,21 @@ export class FirebaseNotificationService {
       });
 
       const failedTokens: string[] = [];
-      response.responses.forEach((resp, idx) => {
-        if (!resp.success) {
-          failedTokens.push(tokens[idx]);
-          console.error('Failed to send to token:', tokens[idx], resp.error);
-        }
-      });
+      if (response.responses && Array.isArray(response.responses)) {
+        response.responses.forEach((resp, idx) => {
+          if (!resp.success) {
+            failedTokens.push(tokens[idx]);
+            console.error('Failed to send to token:', tokens[idx], resp.error);
+          }
+        });
+      } else {
+        console.error('Firebase response.responses is not an array:', response.responses);
+      }
 
-      console.log(`Successfully sent ${response.successCount} messages`);
+      console.log(`Successfully sent ${response.successCount || 0} messages`);
       return {
-        success: response.successCount,
-        failure: response.failureCount,
+        success: response.successCount || 0,
+        failure: response.failureCount || 0,
         failedTokens,
       };
     } catch (error) {

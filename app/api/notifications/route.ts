@@ -54,7 +54,14 @@ export async function POST(request: NextRequest) {
   try {
     await connectDB();
     
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      console.error('Error parsing JSON body:', error);
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
+    
     const { title, message, type, targetUser, adminKey } = body;
 
     // Simple admin authentication - in production, use proper JWT or API key
@@ -124,7 +131,7 @@ export async function POST(request: NextRequest) {
         fcmToken: { $exists: true, $ne: null }
       });
 
-      if (users.length > 0) {
+      if (Array.isArray(users) && users.length > 0) {
         const tokens = users.map(user => user.fcmToken).filter(token => token);
         sendResults = await FirebaseNotificationService.sendToMultipleTokens(
           tokens,
