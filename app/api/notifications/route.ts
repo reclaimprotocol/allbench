@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
 
     // Send push notifications
     let users: any[] = [];
-    let sendResults = { success: 0, failure: 0, failedTokens: [] };
+    let sendResults = { success: 0, failure: 0, failedTokens: [] as string[] };
 
     if (type === 'individual') {
       // Send to specific user
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
             title,
             message,
             data: {
-              notificationId: notification._id.toString(),
+              notificationId: (notification._id as any).toString(),
               type: 'notification'
             }
           }
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
             title,
             message,
             data: {
-              notificationId: notification._id.toString(),
+              notificationId: (notification._id as any).toString(),
               type: 'notification'
             }
           }

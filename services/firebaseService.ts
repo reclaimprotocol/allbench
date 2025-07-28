@@ -106,7 +106,7 @@ export class FirebaseNotificationService {
         },
       };
 
-      const response = await admin.messaging().sendMulticast({
+      const response = await admin.messaging().sendEachForMulticast({
         ...message,
         tokens: tokens,
       });
