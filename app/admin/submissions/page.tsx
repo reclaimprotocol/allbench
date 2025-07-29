@@ -3,10 +3,23 @@
 import { useEffect, useState } from 'react';
 import { Submission, Task } from '../../../types';
 
+interface Message {
+  id: string;
+  type: 'system' | 'user' | 'assistant';
+  content: string;
+  contentType: 'text' | 'image' | 'pdf';
+  uri?: string;
+  fileName?: string;
+  fileData?: string;
+  mimeType?: string;
+  provider?: string;
+}
+
 interface SubmissionWithDetails extends Submission {
   id: string;
   createdAt: string;
   taskName?: string;
+  messages: Message[];
 }
 
 export default function SubmissionsView() {
@@ -205,6 +218,57 @@ export default function SubmissionsView() {
                 <div>
                   <h4 className="font-light text-black dark:text-white font-mono mb-2">Wallet Address</h4>
                   <p className="text-sm font-mono bg-white dark:bg-black border border-black dark:border-white p-2 text-black dark:text-white">{selectedSubmission.walletAddress}</p>
+                </div>
+
+                <div>
+                  <h4 className="font-light text-black dark:text-white font-mono mb-2">Chat Conversation</h4>
+                  <div className="space-y-2 max-h-96 overflow-y-auto border border-black dark:border-white p-4">
+                    {selectedSubmission.messages && selectedSubmission.messages.length > 0 ? (
+                      selectedSubmission.messages.map((message, index) => (
+                        <div key={index} className={`p-3 border border-black dark:border-white ${
+                          message.type === 'user' ? 'ml-8' : message.type === 'assistant' ? 'mr-8' : ''
+                        }`}>
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-xs font-mono font-light text-black dark:text-white opacity-70">
+                              {message.type.toUpperCase()}
+                            </span>
+                            {message.provider && (
+                              <span className="text-xs font-mono font-light text-black dark:text-white opacity-50">
+                                {message.provider}
+                              </span>
+                            )}
+                          </div>
+                          
+                          {message.contentType === 'text' ? (
+                            <p className="text-sm font-mono font-light text-black dark:text-white whitespace-pre-wrap">
+                              {message.content}
+                            </p>
+                          ) : message.contentType === 'image' ? (
+                            <div>
+                              <p className="text-sm font-mono font-light text-black dark:text-white mb-2">
+                                📷 Image: {message.fileName || 'Uploaded image'}
+                              </p>
+                              {message.uri && (
+                                <img 
+                                  src={message.uri} 
+                                  alt={message.fileName || 'Chat image'} 
+                                  className="max-w-xs max-h-48 border border-black dark:border-white"
+                                />
+                              )}
+                            </div>
+                          ) : message.contentType === 'pdf' ? (
+                            <p className="text-sm font-mono font-light text-black dark:text-white">
+                              📄 PDF: {message.fileName || 'Uploaded document'}
+                            </p>
+                          ) : null}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-4 text-black dark:text-white font-mono font-light opacity-70">
+                        No chat conversation available
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div>
