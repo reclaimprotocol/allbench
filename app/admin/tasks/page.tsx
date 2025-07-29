@@ -135,145 +135,145 @@ export default function TasksManagement() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-gray-600">Loading tasks...</div>
+        <div className="text-lg font-light text-black dark:text-white font-mono">Loading tasks...</div>
       </div>
     );
   }
 
   return (
-    <div className="px-4 py-6 sm:px-0">
-      <div className="border-4 border-dashed border-gray-200 rounded-lg p-6">
+    <div className="px-4 py-6 sm:px-0 bg-white dark:bg-black min-h-screen">
+      <div className="border border-black dark:border-white p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Task Management</h2>
+          <h2 className="text-2xl font-light text-black dark:text-white font-mono">Task Management</h2>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+            className="bg-black dark:bg-white text-white dark:text-black px-4 py-2 border border-black dark:border-white font-mono font-light hover:bg-white hover:text-black dark:hover:bg-black dark:hover:text-white transition-colors"
           >
             {showForm ? 'Cancel' : 'Add New Task'}
           </button>
         </div>
 
         {showForm && (
-          <div className="bg-white p-6 rounded-lg shadow mb-6">
-            <h3 className="text-lg font-medium mb-4">
+          <div className="bg-white dark:bg-black border border-black dark:border-white p-6 mb-6">
+            <h3 className="text-lg font-light text-black dark:text-white font-mono mb-4">
               {editingTask ? 'Edit Task' : 'Create New Task'}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Task Name</label>
+                <label className="block text-sm font-light text-black dark:text-white font-mono">Task Name</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                  className="mt-1 block w-full border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white px-3 py-2 font-mono font-light focus:outline-none focus:border-black dark:focus:border-white"
                   required
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <label className="block text-sm font-light text-black dark:text-white font-mono">Description</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                  className="mt-1 block w-full border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white px-3 py-2 font-mono font-light focus:outline-none focus:border-black dark:focus:border-white"
                   rows={3}
                   required
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700">Logo URL</label>
+                <label className="block text-sm font-light text-black dark:text-white font-mono">Logo URL</label>
                 <input
                   type="url"
                   value={formData.logo}
                   onChange={(e) => setFormData(prev => ({ ...prev, logo: e.target.value }))}
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                  className="mt-1 block w-full border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white px-3 py-2 font-mono font-light focus:outline-none focus:border-black dark:focus:border-white"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">System Prompt</label>
+                <label className="block text-sm font-light text-black dark:text-white font-mono">System Prompt</label>
                 <textarea
                   value={formData.systemPrompt}
                   onChange={(e) => setFormData(prev => ({ ...prev, systemPrompt: e.target.value }))}
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                  className="mt-1 block w-full border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white px-3 py-2 font-mono font-light focus:outline-none focus:border-black dark:focus:border-white"
                   rows={4}
                   placeholder="Enter the system prompt that will be sent to all LLMs..."
                   required
                 />
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-black dark:text-white font-mono font-light opacity-70">
                   This prompt will be sent as a system message to all LLMs (OpenAI, Claude) to define their role and behavior for this task.
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Helper System Prompt</label>
+                <label className="block text-sm font-light text-black dark:text-white font-mono">Helper System Prompt</label>
                 <textarea
                   value={formData.helperSystemPrompt}
                   onChange={(e) => setFormData(prev => ({ ...prev, helperSystemPrompt: e.target.value }))}
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                  className="mt-1 block w-full border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white px-3 py-2 font-mono font-light focus:outline-none focus:border-black dark:focus:border-white"
                   rows={3}
                   placeholder="Enter the helper system prompt for chat interactions..."
                   required
                 />
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-black dark:text-white font-mono font-light opacity-70">
                   This prompt will be used for chat interactions in the TaskScreen to provide helpful guidance to users.
                 </p>
               </div>
 
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <label className="block text-sm font-medium text-gray-700">Required Credentials</label>
+                  <label className="block text-sm font-light text-black dark:text-white font-mono">Required Credentials</label>
                   <button
                     type="button"
                     onClick={addCredential}
-                    className="bg-blue-500 text-white px-2 py-1 rounded text-sm hover:bg-blue-600"
+                    className="bg-black dark:bg-white text-white dark:text-black px-2 py-1 border border-black dark:border-white text-sm font-mono font-light hover:bg-white hover:text-black dark:hover:bg-black dark:hover:text-white transition-colors"
                   >
                     Add Credential
                   </button>
                 </div>
                 <div className="space-y-4">
                   {formData.requiredCredentials.map((credential, index) => (
-                    <div key={index} className="border border-gray-200 rounded-lg p-4">
+                    <div key={index} className="border border-black dark:border-white p-4">
                       <div className="flex justify-between items-center mb-3">
-                        <h4 className="text-sm font-medium text-gray-900">Credential {index + 1}</h4>
+                        <h4 className="text-sm font-light text-black dark:text-white font-mono">Credential {index + 1}</h4>
                         <button
                           type="button"
                           onClick={() => removeCredential(index)}
-                          className="text-red-500 hover:text-red-700 text-sm"
+                          className="text-black dark:text-white hover:opacity-70 text-sm font-mono font-light"
                         >
                           Remove
                         </button>
                       </div>
                       <div className="grid grid-cols-1 gap-3">
                         <div>
-                          <label className="block text-xs font-medium text-gray-600">Name</label>
+                          <label className="block text-xs font-light text-black dark:text-white font-mono">Name</label>
                           <input
                             type="text"
                             value={credential.name}
                             onChange={(e) => updateCredential(index, 'name', e.target.value)}
-                            className="mt-1 block w-full border border-gray-300 rounded-md px-2 py-1 text-sm"
+                            className="mt-1 block w-full border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white px-2 py-1 text-sm font-mono font-light focus:outline-none focus:border-black dark:focus:border-white"
                             placeholder="e.g., GitHub Account"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-gray-600">Logo URL</label>
+                          <label className="block text-xs font-light text-black dark:text-white font-mono">Logo URL</label>
                           <input
                             type="url"
                             value={credential.logo}
                             onChange={(e) => updateCredential(index, 'logo', e.target.value)}
-                            className="mt-1 block w-full border border-gray-300 rounded-md px-2 py-1 text-sm"
+                            className="mt-1 block w-full border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white px-2 py-1 text-sm font-mono font-light focus:outline-none focus:border-black dark:focus:border-white"
                             placeholder="https://example.com/logo.png"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-gray-600">Reclaim Provider ID</label>
+                          <label className="block text-xs font-light text-black dark:text-white font-mono">Reclaim Provider ID</label>
                           <input
                             type="text"
                             value={credential.reclaimProviderId}
                             onChange={(e) => updateCredential(index, 'reclaimProviderId', e.target.value)}
-                            className="mt-1 block w-full border border-gray-300 rounded-md px-2 py-1 text-sm"
+                            className="mt-1 block w-full border border-black dark:border-white bg-white dark:bg-black text-black dark:text-white px-2 py-1 text-sm font-mono font-light focus:outline-none focus:border-black dark:focus:border-white"
                             placeholder="provider-id"
                           />
                         </div>
@@ -281,7 +281,7 @@ export default function TasksManagement() {
                     </div>
                   ))}
                   {formData.requiredCredentials.length === 0 && (
-                    <div className="text-center py-8 text-gray-500 text-sm">
+                    <div className="text-center py-8 text-black dark:text-white text-sm font-mono font-light opacity-70">
                       No credentials added. Click "Add Credential" to add required credentials for this task.
                     </div>
                   )}
@@ -294,23 +294,23 @@ export default function TasksManagement() {
                     type="checkbox"
                     checked={formData.active}
                     onChange={(e) => setFormData(prev => ({ ...prev, active: e.target.checked }))}
-                    className="mr-2"
+                    className="mr-2 border border-black dark:border-white"
                   />
-                  <span className="text-sm font-medium text-gray-700">Active</span>
+                  <span className="text-sm font-light text-black dark:text-white font-mono">Active</span>
                 </label>
               </div>
 
               <div className="flex space-x-3">
                 <button
                   type="submit"
-                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+                  className="bg-black dark:bg-white text-white dark:text-black px-4 py-2 border border-black dark:border-white font-mono font-light hover:bg-white hover:text-black dark:hover:bg-black dark:hover:text-white transition-colors"
                 >
                   {editingTask ? 'Update Task' : 'Create Task'}
                 </button>
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                  className="bg-white dark:bg-black text-black dark:text-white px-4 py-2 border border-black dark:border-white font-mono font-light hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
                 >
                   Cancel
                 </button>
@@ -319,27 +319,27 @@ export default function TasksManagement() {
           </div>
         )}
 
-        <div className="bg-white shadow overflow-hidden sm:rounded-md">
-          <ul className="divide-y divide-gray-200">
+        <div className="bg-white dark:bg-black border border-black dark:border-white overflow-hidden">
+          <ul className="divide-y divide-black dark:divide-white">
             {tasks.map((task) => (
               <li key={task.id} className="px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <img src={task.logo} alt={task.name} className="w-10 h-10 rounded-full mr-4" />
+                    <img src={task.logo} alt={task.name} className="w-10 h-10 mr-4" />
                     <div>
                       <div className="flex items-center">
-                        <h3 className="text-lg font-medium text-gray-900">{task.name}</h3>
-                        <span className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          task.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        <h3 className="text-lg font-light text-black dark:text-white font-mono">{task.name}</h3>
+                        <span className={`ml-2 px-2 py-1 text-xs font-mono font-light border ${
+                          task.active ? 'border-black dark:border-white text-black dark:text-white' : 'border-black dark:border-white text-black dark:text-white opacity-50'
                         }`}>
                           {task.active ? 'Active' : 'Inactive'}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-500">{task.description}</p>
+                      <p className="text-sm text-black dark:text-white font-mono font-light opacity-70">{task.description}</p>
                       <div className="mt-1">
-                        <span className="text-xs text-gray-400">Required credentials: </span>
+                        <span className="text-xs text-black dark:text-white font-mono font-light opacity-50">Required credentials: </span>
                         {task.requiredCredentials.map((cred, index) => (
-                          <span key={cred.id} className="text-xs text-blue-600">
+                          <span key={cred.id} className="text-xs text-black dark:text-white font-mono font-light">
                             {cred.name}{index < task.requiredCredentials.length - 1 ? ', ' : ''}
                           </span>
                         ))}
@@ -349,13 +349,13 @@ export default function TasksManagement() {
                   <div className="flex space-x-2">
                     <button
                       onClick={() => handleEdit(task)}
-                      className="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600"
+                      className="bg-white dark:bg-black text-black dark:text-white px-3 py-1 border border-black dark:border-white text-sm font-mono font-light hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDelete(task.id)}
-                      className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
+                      className="bg-black dark:bg-white text-white dark:text-black px-3 py-1 border border-black dark:border-white text-sm font-mono font-light hover:bg-white hover:text-black dark:hover:bg-black dark:hover:text-white transition-colors"
                     >
                       Delete
                     </button>
