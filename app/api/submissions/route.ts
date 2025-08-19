@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '../../../lib/mongoose';
 import Submission from '../../../models/Submission';
 import User from '../../../models/User';
+import llmEvaluationService from '../../../services/llmEvaluationService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,6 +13,25 @@ export async function POST(request: NextRequest) {
     if (!taskId || !llmResponses || !rubrics || !username) {
       return NextResponse.json(
         { error: 'taskId, llmResponses, rubrics, and username are required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate that all rubrics have green status (within 20% variance)
+    const allGreen = llmEvaluationService.areAllRubricsGreen(
+      rubrics.map((rubric: any) => ({
+        rubricId: rubric.rubricId,
+        scoreVariance: {
+          status: rubric.scoreVariance?.status || 'red',
+          scores: rubric.evaluations?.map((e: any) => e.score) || [],
+          variance: rubric.scoreVariance?.variance || 100
+        }
+      }))
+    );
+
+    if (!allGreen) {
+      return NextResponse.json(
+        { error: 'Cannot submit: one or more rubrics have score variance > 20%. All rubrics must be in green status.' },
         { status: 400 }
       );
     }

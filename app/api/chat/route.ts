@@ -32,8 +32,9 @@ function messagesToPrompt(message: string, task: any): string {
 // LLM API functions
 async function callOpenAI(prompt: string, helperSystemPrompt: string): Promise<string> {
   try {
+
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-5-mini',
       messages: [
         {
           role: 'system',
@@ -44,8 +45,6 @@ async function callOpenAI(prompt: string, helperSystemPrompt: string): Promise<s
           content: prompt
         }
       ],
-      max_tokens: 500,
-      temperature: 0.7,
     });
 
     return response.choices[0]?.message?.content || 'No response generated';
@@ -58,7 +57,7 @@ async function callOpenAI(prompt: string, helperSystemPrompt: string): Promise<s
 async function callAnthropic(prompt: string, helperSystemPrompt: string): Promise<string> {
   try {
     const response = await anthropic.messages.create({
-      model: 'claude-3-haiku-20240307',
+      model: 'claude-3-5-haiku-20241022',
       max_tokens: 500,
       system: helperSystemPrompt,
       messages: [
@@ -136,7 +135,7 @@ export async function POST(request: NextRequest) {
       switch (selectedProvider) {
         case 'openai':
           response = await callOpenAI(prompt, helperSystemPrompt);
-          providerName = 'OpenAI GPT-4';
+          providerName = 'OpenAI GPT-5';
           break;
         case 'anthropic':
           response = await callAnthropic(prompt, helperSystemPrompt);
@@ -166,7 +165,7 @@ export async function POST(request: NextRequest) {
           switch (fallbackProvider) {
             case 'openai':
               response = await callOpenAI(prompt, helperSystemPrompt);
-              providerName = 'OpenAI GPT-4';
+              providerName = 'OpenAI GPT-5';
               break;
             case 'anthropic':
               response = await callAnthropic(prompt, helperSystemPrompt);

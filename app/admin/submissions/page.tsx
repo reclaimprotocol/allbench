@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Submission, Task } from '../../../types';
+import { Submission, Task, Rubric } from '../../../types';
 
 interface Message {
   id: string;
@@ -25,6 +25,7 @@ interface SubmissionWithDetails extends Submission {
 export default function SubmissionsView() {
   const [submissions, setSubmissions] = useState<SubmissionWithDetails[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [rubrics, setRubrics] = useState<Rubric[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSubmission, setSelectedSubmission] = useState<SubmissionWithDetails | null>(null);
   const [filters, setFilters] = useState({
@@ -35,6 +36,7 @@ export default function SubmissionsView() {
   useEffect(() => {
     fetchSubmissions();
     fetchTasks();
+    fetchRubrics();
   }, []);
 
   const fetchSubmissions = async () => {
@@ -59,9 +61,24 @@ export default function SubmissionsView() {
     }
   };
 
+  const fetchRubrics = async () => {
+    try {
+      const response = await fetch('/api/rubrics');
+      const data = await response.json();
+      setRubrics(data);
+    } catch (error) {
+      console.error('Error fetching rubrics:', error);
+    }
+  };
+
   const getTaskName = (taskId: string) => {
     const task = tasks.find(t => t.id === taskId);
     return task?.name || `Task ${taskId}`;
+  };
+
+  const getRubricDetails = (rubricId: string) => {
+    const rubric = rubrics.find(r => r.id === rubricId);
+    return rubric || { id: rubricId, name: `Rubric ${rubricId}`, description: 'Description not available', taskId: '' };
   };
 
   const calculateOverallScore = (submission: SubmissionWithDetails) => {
@@ -288,24 +305,30 @@ export default function SubmissionsView() {
                 <div>
                   <h4 className="font-light text-black dark:text-white font-mono mb-2">Evaluations</h4>
                   <div className="space-y-3">
-                    {selectedSubmission.rubrics.map((rubric, rubricIndex) => (
-                      <div key={rubricIndex} className="border border-black dark:border-white p-4">
-                        <h5 className="font-light text-black dark:text-white font-mono mb-2">Rubric {rubric.rubricId}</h5>
-                        <div className="space-y-2">
-                          {rubric.evaluations.map((evaluation, evalIndex) => (
-                            <div key={evalIndex} className="flex justify-between items-start bg-white dark:bg-black border border-black dark:border-white p-3">
-                              <div className="flex-1">
-                                <div className="flex justify-between items-center mb-1">
-                                  <span className="text-sm font-light text-black dark:text-white font-mono">{evaluation.llmName}</span>
-                                  <span className="text-sm font-light text-black dark:text-white font-mono">Score: {evaluation.score}/10</span>
+                    {selectedSubmission.rubrics.map((rubric, rubricIndex) => {
+                      const rubricDetails = getRubricDetails(rubric.rubricId);
+                      return (
+                        <div key={rubricIndex} className="border border-black dark:border-white p-4">
+                          <div className="mb-3">
+                            <h5 className="font-light text-black dark:text-white font-mono mb-1">{rubricDetails.name}</h5>
+                            <p className="text-sm font-mono font-light text-black dark:text-white opacity-70">{rubricDetails.description}</p>
+                          </div>
+                          <div className="space-y-2">
+                            {rubric.evaluations.map((evaluation, evalIndex) => (
+                              <div key={evalIndex} className="flex justify-between items-start bg-white dark:bg-black border border-black dark:border-white p-3">
+                                <div className="flex-1">
+                                  <div className="flex justify-between items-center mb-1">
+                                    <span className="text-sm font-light text-black dark:text-white font-mono">{evaluation.llmName}</span>
+                                    <span className="text-sm font-light text-black dark:text-white font-mono">Score: {evaluation.score}/10</span>
+                                  </div>
+                                  <p className="text-sm text-black dark:text-white font-mono font-light">{evaluation.description}</p>
                                 </div>
-                                <p className="text-sm text-black dark:text-white font-mono font-light">{evaluation.description}</p>
                               </div>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </div>

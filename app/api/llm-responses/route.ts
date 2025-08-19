@@ -74,10 +74,8 @@ async function callOpenAI(prompt: string, messages: any[], systemPrompt: string)
     }
 
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-5-2025-08-07',
       messages: openaiMessages,
-      max_tokens: 1000,
-      temperature: 0.7,
     });
 
     return response.choices[0]?.message?.content || 'No response generated';
@@ -106,7 +104,7 @@ async function callAnthropic(prompt: string, messages: any[], systemPrompt: stri
     }
 
     const response = await anthropic.messages.create({
-      model: 'claude-3-haiku-20240307',
+      model: 'claude-opus-4-1-20250805',
       max_tokens: 1000,
       system: systemPrompt,
       messages: [
@@ -128,7 +126,7 @@ async function callAnthropic(prompt: string, messages: any[], systemPrompt: stri
 // Sample LLM responses as fallback
 const sampleLLMResponses = [
   {
-    llmName: 'OpenAI GPT-4',
+    llmName: 'OpenAI GPT-5',
     response: '# Could not find any relevant information in the provided context.'
   },
   {
@@ -185,7 +183,7 @@ export async function POST(request: NextRequest) {
 
     const llmResponses = [
       {
-        llmName: 'OpenAI GPT-4',
+        llmName: 'OpenAI GPT-5',
         response: responses[0].status === 'fulfilled' ? responses[0].value : `Error: ${responses[0].reason}`
       },
       {
