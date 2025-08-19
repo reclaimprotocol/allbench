@@ -119,7 +119,8 @@ export async function POST(request: NextRequest) {
         };
       } catch (error) {
         console.error(`Error evaluating rubric ${rubric.name}:`, error);
-        throw new Error(`Failed to evaluate rubric "${rubric.name}": ${error.message}`);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        throw new Error(`Failed to evaluate rubric "${rubric.name}": ${errorMessage}`);
       }
     });
     
@@ -138,16 +139,21 @@ export async function POST(request: NextRequest) {
     
   } catch (error) {
     console.error('Error evaluating rubrics:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    const errorStack = error instanceof Error ? error.stack : 'No stack trace available';
+    const errorName = error instanceof Error ? error.name : 'Unknown error type';
+    
     console.error('Full error details:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
+      message: errorMessage,
+      stack: errorStack,
+      name: errorName
     });
+    
     return NextResponse.json(
       { 
         error: 'Failed to evaluate rubrics',
-        details: error.message,
-        type: error.name
+        details: errorMessage,
+        type: errorName
       },
       { status: 500 }
     );

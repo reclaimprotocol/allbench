@@ -86,7 +86,8 @@ Format your response as JSON:
             description: descMatch[1]
           };
         } else {
-          throw new Error(`Invalid JSON response from OpenAI: ${jsonError.message}`);
+          const errorMessage = jsonError instanceof Error ? jsonError.message : 'Unknown JSON parsing error';
+          throw new Error(`Invalid JSON response from OpenAI: ${errorMessage}`);
         }
       }
       return {
@@ -96,13 +97,16 @@ Format your response as JSON:
       };
     } catch (error) {
       console.error('OpenAI evaluation error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      const errorStack = error instanceof Error ? error.stack : 'No stack trace available';
+      
       console.error('Error details:', {
-        message: error.message,
-        stack: error.stack,
+        message: errorMessage,
+        stack: errorStack,
         rubricName,
         candidateResponseLength: candidateResponse?.length || 0
       });
-      throw new Error(`Failed to evaluate with OpenAI: ${error.message}`);
+      throw new Error(`Failed to evaluate with OpenAI: ${errorMessage}`);
     }
   }
 
@@ -166,7 +170,8 @@ Format your response as JSON:
             description: descMatch[1]
           };
         } else {
-          throw new Error(`Invalid JSON response from Claude: ${jsonError.message}`);
+          const errorMessage = jsonError instanceof Error ? jsonError.message : 'Unknown JSON parsing error';
+          throw new Error(`Invalid JSON response from Claude: ${errorMessage}`);
         }
       }
       return {
@@ -176,13 +181,16 @@ Format your response as JSON:
       };
     } catch (error) {
       console.error('Claude evaluation error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      const errorStack = error instanceof Error ? error.stack : 'No stack trace available';
+      
       console.error('Error details:', {
-        message: error.message,
-        stack: error.stack,
+        message: errorMessage,
+        stack: errorStack,
         rubricName,
         candidateResponseLength: candidateResponse?.length || 0
       });
-      throw new Error(`Failed to evaluate with Claude: ${error.message}`);
+      throw new Error(`Failed to evaluate with Claude: ${errorMessage}`);
     }
   }
 
@@ -205,7 +213,8 @@ Format your response as JSON:
         evaluations.push(openaiResult);
         console.log('OpenAI evaluation successful');
       } catch (error) {
-        console.error('OpenAI evaluation failed:', error.message);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        console.error('OpenAI evaluation failed:', errorMessage);
         // Add a fallback evaluation
         evaluations.push({
           llmName: 'OpenAI GPT-4o (Fallback)',
@@ -220,7 +229,8 @@ Format your response as JSON:
         evaluations.push(claudeResult);
         console.log('Claude evaluation successful');
       } catch (error) {
-        console.error('Claude evaluation failed:', error.message);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        console.error('Claude evaluation failed:', errorMessage);
         // Add a fallback evaluation
         evaluations.push({
           llmName: 'Claude 3.5 Sonnet (Fallback)',

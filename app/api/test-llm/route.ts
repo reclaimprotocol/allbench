@@ -46,14 +46,18 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error(`Error testing LLM service:`, error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    const errorStack = error instanceof Error ? error.stack : 'No stack trace available';
+    const errorName = error instanceof Error ? error.name : 'Unknown error type';
+    
     return NextResponse.json(
       { 
         success: false,
-        error: error.message,
+        error: errorMessage,
         details: {
-          message: error.message,
-          stack: error.stack,
-          name: error.name
+          message: errorMessage,
+          stack: errorStack,
+          name: errorName
         }
       },
       { status: 500 }
