@@ -9,6 +9,7 @@ export interface IEvaluation {
   llmName: string;
   score: number;
   description: string;
+  candidateLlmName?: string; // Which candidate LLM response this evaluation is for
 }
 
 export interface IRubricEvaluation {
@@ -46,7 +47,8 @@ const LLMResponseSchema = new Schema<ILLMResponse>({
 const EvaluationSchema = new Schema<IEvaluation>({
   llmName: { type: String, required: true },
   score: { type: Number, required: true, min: 0, max: 10 },
-  description: { type: String, required: true }
+  description: { type: String, required: true },
+  candidateLlmName: { type: String, required: false }
 });
 
 const RubricEvaluationSchema = new Schema<IRubricEvaluation>({

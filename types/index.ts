@@ -37,6 +37,7 @@ export interface Submission {
       llmName: string;
       score: number;
       description: string;
+      candidateLlmName?: string;
     }[];
   }[];
   walletAddress: string;

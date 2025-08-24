@@ -95,6 +95,39 @@ export default function SubmissionsView() {
     return totalEvaluations > 0 ? (totalScore / totalEvaluations).toFixed(1) : 'N/A';
   };
 
+  const calculateRubricAgreement = (evaluations: { llmName: string; score: number; description: string; candidateLlmName?: string }[]) => {
+    if (evaluations.length < 2) return { status: 'N/A' as const, variance: 0 };
+    
+    const scores = evaluations.map(e => e.score);
+    const max = Math.max(...scores);
+    const min = Math.min(...scores);
+    const variance = ((max - min) / 10) * 100; // Convert to percentage
+
+    let status: 'green' | 'yellow' | 'red';
+    if (variance <= 10) {
+      status = 'green';
+    } else if (variance <= 30) {
+      status = 'yellow';
+    } else {
+      status = 'red';
+    }
+
+    return { status, variance };
+  };
+
+  const getAgreementStatusColor = (status: 'green' | 'yellow' | 'red' | 'N/A') => {
+    switch (status) {
+      case 'green':
+        return 'bg-green-100 text-green-800 border-green-300';
+      case 'yellow':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'red':
+        return 'bg-red-100 text-red-800 border-red-300';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-300';
+    }
+  };
+
   const filteredSubmissions = submissions.filter(submission => {
     if (filters.taskId && submission.taskId !== filters.taskId) return false;
     if (filters.walletAddress && !submission.walletAddress.toLowerCase().includes(filters.walletAddress.toLowerCase())) return false;
@@ -165,6 +198,27 @@ export default function SubmissionsView() {
                         <span className="text-sm font-light text-black dark:text-white font-mono">
                           Score: {calculateOverallScore(submission)}
                         </span>
+                        {submission.rubrics.length > 0 && (
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs text-black dark:text-white font-mono font-light opacity-70">
+                              AI Agreement:
+                            </span>
+                            <div className="flex space-x-1">
+                              {submission.rubrics.map((rubric, index) => {
+                                const agreement = calculateRubricAgreement(rubric.evaluations);
+                                return (
+                                  <div
+                                    key={index}
+                                    className={`px-1.5 py-0.5 text-xs font-mono border ${getAgreementStatusColor(agreement.status)}`}
+                                    title={`${getRubricDetails(rubric.rubricId).name}: ${agreement.variance.toFixed(1)}% variance`}
+                                  >
+                                    {agreement.status === 'N/A' ? 'N/A' : agreement.status.toUpperCase()}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                         <span className="text-sm text-black dark:text-white font-mono font-light opacity-70">
                           {submission.createdAt && new Date(submission.createdAt).toLocaleDateString()}
                         </span>
@@ -289,48 +343,100 @@ export default function SubmissionsView() {
                 </div>
 
                 <div>
-                  <h4 className="font-light text-black dark:text-white font-mono mb-2">LLM Responses</h4>
-                  <div className="space-y-3">
+                  <h4 className="font-light text-black dark:text-white font-mono mb-2">LLM Responses & Evaluations</h4>
+                  <div className="space-y-4">
                     {selectedSubmission.llmResponses.map((response, index) => (
                       <div key={index} className="border border-black dark:border-white p-4">
-                        <h5 className="font-light text-black dark:text-white font-mono mb-2">{response.llmName}</h5>
-                        <div className="text-sm text-black dark:text-white font-mono font-light whitespace-pre-wrap bg-white dark:bg-black border border-black dark:border-white p-3">
+                        <h5 className="font-light text-black dark:text-white font-mono mb-2">{response.llmName} - Candidate Response</h5>
+                        <div className="text-sm text-black dark:text-white font-mono font-light whitespace-pre-wrap bg-white dark:bg-black border border-black dark:border-white p-3 mb-4">
                           {response.response}
+                        </div>
+                        
+                        {/* Show rubric evaluations for this specific candidate response */}
+                        <div className="mt-3">
+                          <h6 className="text-sm font-light text-black dark:text-white font-mono mb-3">
+                            Rubric Evaluations for {response.llmName}'s Response:
+                          </h6>
+                          
+                          {selectedSubmission.rubrics.map((rubric, rubricIndex) => {
+                            const rubricDetails = getRubricDetails(rubric.rubricId);
+                            
+                            // Find evaluations for this specific candidate response
+                            const candidateEvaluations = rubric.evaluations.filter(evaluation => 
+                              evaluation.candidateLlmName === response.llmName ||
+                              (!evaluation.candidateLlmName && rubric.evaluations.length <= 2) // fallback for old data
+                            );
+                            
+                            // Only show rubric if there are evaluations for this candidate
+                            if (candidateEvaluations.length === 0) {
+                              return null;
+                            }
+                            
+                            const agreement = calculateRubricAgreement(candidateEvaluations);
+                            const scores = candidateEvaluations.map(e => e.score);
+                            const avgScore = scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) : 'N/A';
+                            
+                            return (
+                              <div key={rubricIndex} className="bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 p-3 mb-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800">
+                                <div className="flex justify-between items-start mb-2">
+                                  <div className="flex-1">
+                                    <div className="flex items-center space-x-3 mb-1">
+                                      <span className="font-mono font-light text-black dark:text-white text-base">
+                                        {rubricDetails.name}
+                                      </span>
+                                      <span className="text-xs font-mono text-black dark:text-white bg-white dark:bg-black px-2 py-1 border border-black dark:border-white">
+                                        Avg: {avgScore}/10
+                                      </span>
+                                      {agreement.status !== 'N/A' && (
+                                        <div className={`px-2 py-1 text-xs font-mono border ${getAgreementStatusColor(agreement.status)}`}>
+                                          {agreement.status.toUpperCase()} ({agreement.variance.toFixed(1)}%)
+                                        </div>
+                                      )}
+                                    </div>
+                                    <p className="text-xs font-mono font-light text-black dark:text-white opacity-70 mb-2">
+                                      {rubricDetails.description}
+                                    </p>
+                                  </div>
+                                </div>
+                                
+                                {/* Show evaluator LLMs clearly */}
+                                <div className="space-y-2">
+                                  {candidateEvaluations.map((evaluation, evalIndex) => (
+                                    <div key={evalIndex} className="bg-white dark:bg-black border border-black dark:border-white p-3">
+                                      <div className="flex justify-between items-center mb-2">
+                                        <span className="font-mono font-light text-black dark:text-white text-sm">
+                                          <span className="font-medium">{evaluation.llmName}</span>'s evaluation for <span className="font-medium">{response.llmName}</span>'s response
+                                        </span>
+                                        <div className="flex items-center space-x-2">
+                                          <span className="text-sm font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 text-black dark:text-white border border-gray-300 dark:border-gray-600">
+                                            {evaluation.score}/10
+                                          </span>
+                                          {scores.length > 1 && (
+                                            <span className={`text-xs px-2 py-1 font-mono border ${
+                                              Math.abs(evaluation.score - parseFloat(avgScore)) <= 1 
+                                                ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900 dark:text-green-300' 
+                                                : 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900 dark:text-yellow-300'
+                                            }`}>
+                                              {evaluation.score >= parseFloat(avgScore) ? '+' : ''}{(evaluation.score - parseFloat(avgScore)).toFixed(1)}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <p className="text-sm font-mono font-light text-black dark:text-white opacity-80 italic">
+                                        "{evaluation.description}"
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div>
-                  <h4 className="font-light text-black dark:text-white font-mono mb-2">Evaluations</h4>
-                  <div className="space-y-3">
-                    {selectedSubmission.rubrics.map((rubric, rubricIndex) => {
-                      const rubricDetails = getRubricDetails(rubric.rubricId);
-                      return (
-                        <div key={rubricIndex} className="border border-black dark:border-white p-4">
-                          <div className="mb-3">
-                            <h5 className="font-light text-black dark:text-white font-mono mb-1">{rubricDetails.name}</h5>
-                            <p className="text-sm font-mono font-light text-black dark:text-white opacity-70">{rubricDetails.description}</p>
-                          </div>
-                          <div className="space-y-2">
-                            {rubric.evaluations.map((evaluation, evalIndex) => (
-                              <div key={evalIndex} className="flex justify-between items-start bg-white dark:bg-black border border-black dark:border-white p-3">
-                                <div className="flex-1">
-                                  <div className="flex justify-between items-center mb-1">
-                                    <span className="text-sm font-light text-black dark:text-white font-mono">{evaluation.llmName}</span>
-                                    <span className="text-sm font-light text-black dark:text-white font-mono">Score: {evaluation.score}/10</span>
-                                  </div>
-                                  <p className="text-sm text-black dark:text-white font-mono font-light">{evaluation.description}</p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
               </div>
 
               <div className="mt-6 flex justify-end">

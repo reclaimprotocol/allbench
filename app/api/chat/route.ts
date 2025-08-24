@@ -26,7 +26,7 @@ function selectRandomLLM(availableProviders: LLMProvider[]): LLMProvider {
 
 // Helper function to convert messages to text prompt
 function messagesToPrompt(message: string, task: any): string {
-  return `Task: ${task.name}\n\nUser Message: ${message}\n\nPlease provide a helpful response based on the task context.`;
+  return `Task: ${task.name}\n\nUser Message: ${message}\n\nPlease provide a helpful response that will help the user complete the task. keep your responses concise and to the point, under 200 characters. If you think there is enough information in the user message, you can just say "I think there is enough information in the user message to complete the task. Tap on done to continue."`;
 }
 
 // LLM API functions
