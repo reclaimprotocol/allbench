@@ -176,18 +176,18 @@ export default function AdminDashboard() {
               <span className="mt-2 block text-sm font-light text-black dark:text-white">Create and edit tasks</span>
             </a>
             <a
-              href="/admin/tasks"
+              href="/admin/rubrics"
               className="relative block w-full bg-white dark:bg-black border border-black dark:border-white p-6 text-center hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none"
             >
-              <span className="block text-sm font-light text-black dark:text-white">Manage Task Credentials</span>
-              <span className="mt-2 block text-sm font-light text-black dark:text-white">Configure credentials within tasks</span>
+              <span className="block text-sm font-light text-black dark:text-white">Manage Rubrics</span>
+              <span className="mt-2 block text-sm font-light text-black dark:text-white">View rubrics and AI agreement</span>
             </a>
             <a
               href="/admin/submissions"
               className="relative block w-full bg-white dark:bg-black border border-black dark:border-white p-6 text-center hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none"
             >
               <span className="block text-sm font-light text-black dark:text-white">View Submissions</span>
-              <span className="mt-2 block text-sm font-light text-black dark:text-white">Review user submissions</span>
+              <span className="mt-2 block text-sm font-light text-black dark:text-white">Review user submissions with AI evaluations</span>
             </a>
             <a
               href="/admin/notifications"

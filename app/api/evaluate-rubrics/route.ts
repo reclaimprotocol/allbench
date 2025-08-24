@@ -5,21 +5,27 @@ import llmEvaluationService, { LLMEvaluationResult, ScoreVariance } from '../../
 
 interface EvaluateRubricsRequest {
   rubricIds: string[];
-  candidateResponse: string;
+  candidateResponses: { llmName: string; response: string; }[];
+}
+
+interface CandidateResponseEvaluation {
+  candidateLlmName: string;
+  evaluations: LLMEvaluationResult[];
+  scoreVariance: ScoreVariance;
 }
 
 interface RubricEvaluationResponse {
   rubricId: string;
   rubricName: string;
-  evaluations: LLMEvaluationResult[];
-  scoreVariance: ScoreVariance;
+  candidateEvaluations: CandidateResponseEvaluation[];
+  overallScoreVariance: ScoreVariance;
 }
 
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
     const body: EvaluateRubricsRequest = await request.json();
-    const { rubricIds, candidateResponse } = body;
+    const { rubricIds, candidateResponses } = body;
     
     if (!rubricIds || !Array.isArray(rubricIds) || rubricIds.length === 0) {
       return NextResponse.json(
@@ -28,11 +34,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!candidateResponse || candidateResponse.trim().length === 0) {
+    if (!candidateResponses || !Array.isArray(candidateResponses) || candidateResponses.length === 0) {
       return NextResponse.json(
-        { error: 'candidateResponse is required and cannot be empty' },
+        { error: 'candidateResponses array is required and cannot be empty' },
         { status: 400 }
       );
+    }
+
+    // Validate each candidate response
+    for (const candidate of candidateResponses) {
+      if (!candidate.llmName || !candidate.response || candidate.response.trim().length === 0) {
+        return NextResponse.json(
+          { error: 'Each candidate response must have llmName and non-empty response' },
+          { status: 400 }
+        );
+      }
     }
     
     // Fetch all rubrics
@@ -89,33 +105,52 @@ export async function POST(request: NextRequest) {
     console.log('Starting evaluation for rubrics:', {
       rubricCount: rubrics.length,
       rubricNames: rubrics.map(r => r.name),
-      candidateResponseLength: candidateResponse.length
+      candidateCount: candidateResponses.length,
+      candidateNames: candidateResponses.map(c => c.llmName)
     });
 
-    // Evaluate each rubric
+    // Evaluate each rubric against each candidate response
     const evaluationPromises = rubrics.map(async (rubric) => {
       try {
         console.log(`Evaluating rubric: ${rubric.name}`);
-        const evaluations = await llmEvaluationService.evaluateRubric(
-          rubric.name,
-          rubric.description,
-          candidateResponse
-        );
         
-        const scores = evaluations.map(e => e.score);
-        const scoreVariance = llmEvaluationService.calculateScoreVariance(scores);
+        // Evaluate this rubric against each candidate response
+        const candidateEvaluations: CandidateResponseEvaluation[] = [];
         
-        console.log(`Completed evaluation for rubric: ${rubric.name}`, {
-          scores,
-          variance: scoreVariance.variance,
-          status: scoreVariance.status
-        });
+        for (const candidate of candidateResponses) {
+          console.log(`Evaluating candidate: ${candidate.llmName} with rubric: ${rubric.name}`);
+          
+          const evaluations = await llmEvaluationService.evaluateRubric(
+            rubric.name,
+            rubric.description,
+            candidate.response
+          );
+          
+          const scores = evaluations.map(e => e.score);
+          const scoreVariance = llmEvaluationService.calculateScoreVariance(scores);
+          
+          candidateEvaluations.push({
+            candidateLlmName: candidate.llmName,
+            evaluations,
+            scoreVariance
+          });
+          
+          console.log(`Completed evaluation for candidate: ${candidate.llmName}`, {
+            scores,
+            variance: scoreVariance.variance,
+            status: scoreVariance.status
+          });
+        }
+        
+        // Calculate overall variance across all candidates for this rubric
+        const allScores = candidateEvaluations.flatMap(ce => ce.evaluations.map(e => e.score));
+        const overallScoreVariance = llmEvaluationService.calculateScoreVariance(allScores);
         
         return {
           rubricId: rubric._id.toString(),
           rubricName: rubric.name,
-          evaluations,
-          scoreVariance
+          candidateEvaluations,
+          overallScoreVariance
         };
       } catch (error) {
         console.error(`Error evaluating rubric ${rubric.name}:`, error);
@@ -126,10 +161,21 @@ export async function POST(request: NextRequest) {
     
     const results: RubricEvaluationResponse[] = await Promise.all(evaluationPromises);
     
-    // Check if all rubrics are green (within 20% variance)
-    const allGreen = llmEvaluationService.areAllRubricsGreen(
-      results.map(r => ({ rubricId: r.rubricId, scoreVariance: r.scoreVariance }))
+    // Check if all rubrics are green (within variance threshold) across all candidate responses
+    const allGreen = results.every(rubric => 
+      rubric.overallScoreVariance.status === 'green' &&
+      rubric.candidateEvaluations.every(candidate => candidate.scoreVariance.status === 'green')
     );
+    
+    console.log('Evaluation complete:', {
+      rubricCount: results.length,
+      allGreen,
+      overallStatuses: results.map(r => ({
+        rubric: r.rubricName,
+        overall: r.overallScoreVariance.status,
+        candidates: r.candidateEvaluations.map(c => ({ name: c.candidateLlmName, status: c.scoreVariance.status }))
+      }))
+    });
     
     return NextResponse.json({
       evaluations: results,

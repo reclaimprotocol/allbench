@@ -47,12 +47,12 @@ ${candidateResponse}
 
 Please provide:
 1. A score from 0-10 (where 0 is completely failing the rubric and 10 is perfectly meeting it)
-2. A brief explanation (2-3 sentences) of why you gave this score
+2. A brief explanation (MAXIMUM 200 characters) of why you gave this score
 
 Format your response as JSON:
 {
   "score": <number>,
-  "description": "<explanation>"
+  "description": "<explanation under 200 characters>"
 }
 `;
 
@@ -60,8 +60,6 @@ Format your response as JSON:
       const response = await this.openai.chat.completions.create({
         model: "gpt-5-2025-08-07",
         messages: [{ role: "user", content: prompt }],
-        temperature: 0.3,
-        max_tokens: 300
       });
 
       const content = response.choices[0]?.message?.content?.trim();
@@ -130,12 +128,12 @@ ${candidateResponse}
 
 Please provide:
 1. A score from 0-10 (where 0 is completely failing the rubric and 10 is perfectly meeting it)
-2. A brief explanation (2-3 sentences) of why you gave this score
+2. A brief explanation (MAXIMUM 200 characters) of why you gave this score
 
 Format your response as JSON:
 {
   "score": <number>,
-  "description": "<explanation>"
+  "description": "<explanation under 200 characters>"
 }
 `;
 

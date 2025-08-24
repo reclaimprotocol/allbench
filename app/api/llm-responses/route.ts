@@ -16,7 +16,10 @@ const anthropic = new Anthropic({
 
 // Helper function to convert messages to text prompt
 function messagesToPrompt(messages: any[], task: any): string {
-  let prompt = ``;
+  let prompt = `IMPORTANT CONTEXT: This problem statement has been created from a conversation between a user and an AI assistant. The user's inputs represent the actual task requirements, while the AI assistant's messages provide additional context that may be helpful.
+
+CONVERSATION HISTORY:
+`;
   
   // Ensure messages is an array
   if (!Array.isArray(messages)) {
@@ -25,16 +28,21 @@ function messagesToPrompt(messages: any[], task: any): string {
   }
   
   messages.forEach((message: any, index: number) => {
+    const speaker = message.type === 'user' ? 'USER' : message.type === 'assistant' ? 'AI ASSISTANT' : 'SYSTEM';
+    
     if (message.contentType === 'text') {
-      prompt += `${index + 1}. ${message.content}\n`;
+      prompt += `${index + 1}. [${speaker}]: ${message.content}\n`;
     } else if (message.contentType === 'image') {
-      prompt += `${index + 1}. [Image: ${message.fileName || 'Image attachment'}]\n`;
+      prompt += `${index + 1}. [${speaker}]: [Image: ${message.fileName || 'Image attachment'}]\n`;
     } else if (message.contentType === 'pdf') {
-      prompt += `${index + 1}. [PDF Document: ${message.fileName || 'Document attachment'}]\n`;
+      prompt += `${index + 1}. [${speaker}]: [PDF Document: ${message.fileName || 'Document attachment'}]\n`;
     }
   });
   
-  prompt += '\nPlease analyze the provided information and provide a comprehensive response based on the task requirements.';
+  prompt += `
+TASK: Based on the conversation above, please provide a comprehensive response to address the user's requirements. Focus primarily on what the user requested, but you may use the AI assistant's messages as additional context to better understand the problem.
+
+Please analyze the provided information and provide a detailed, helpful response.`;
   return prompt;
 }
 
