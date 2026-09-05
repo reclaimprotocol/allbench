@@ -1,5 +1,3 @@
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
 import mongoose from 'mongoose';
 import connectDB from '../lib/mongoose';
 import Task from '../models/Task';
