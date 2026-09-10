@@ -15,7 +15,7 @@
     "firebase-admin": "^13.4.0",
     "mongoose": "^8.16.5",
     "multer": "^2.0.2",
-    "next": "15.4.4",
+    "next": "15.5.25",
     "openai": "^5.10.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
